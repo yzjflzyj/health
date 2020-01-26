@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace：给哪个接口配置的映射，写接口的全限定类名-->
+<mapper namespace="com.itheima.dao.CheckGroupDao">
+    <!--新增检查组-->
+    <insert id="add" parameterType="com.itheima.pojo.CheckGroup">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into t_checkgroup(code,name,sex,helpCode,remark,attention)
+        values
+        (#{code},#{name},#{sex},#{helpCode},#{remark},#{attention})
+    </insert>
+
+    <!--设置检查组和检查项的关联关系-->
+    <insert id="setCheckGroupAndCheckItem" parameterType="map">
+        insert into t_checkgroup_checkitem(checkgroup_id,checkitem_id)
+      		values
+      	(#{groupid},#{checkitemId})
+    </insert>
+
+    <!--检查组分页-->
+    <select id="selectByCondition" parameterType="string" resultType="com.itheima.pojo.CheckGroup">
+        select * from t_checkgroup
+        <if test="value != null and value.length>0">
+            where code= #{value} or name =#{value}
+        </if>
+    </select>
+
+    <!--编辑,检查组基本信息-->
+    <select id="findById" parameterType="Integer" resultType="com.itheima.pojo.CheckGroup">
+        select * from t_checkgroup where id=#{groupId}
+    </select>
+
+    <!--编辑,检查项复选框数组-->
+    <select id="findCheckItemIds" parameterType="int" resultType="int">
+        select checkitem_id from t_checkgroup_checkitem where checkgroup_id=#{groupId}
+    </select>
+
+    <!--编辑,更新检查组-->
+    <update id="updateGroup" parameterType="com.itheima.pojo.CheckGroup">
+        update t_checkgroup
+        <set>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="attention != null">
+                attention = #{attention},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--编辑,删除已有的中间表信息-->
+    <delete id="deleteAssociation" parameterType="int">
+        delete from t_checkgroup_checkitem where checkgroup_id = #{id}
+    </delete>
+
+    <!--增添,查询所有检查组信息-->
+    <select id="findAll" resultType="com.itheima.pojo.CheckGroup">
+        select * from t_checkgroup
+    </select>
+
+    <!--移动端,套餐关联的检查组查询-->
+    <select id="findCheckGroupById" parameterType="int" resultMap="findByIdResultMap">
+        select * from t_checkgroup where id in (select checkgroup_id  from t_setmeal_checkgroup where setmeal_id=#{id})
+    </select>
+
+    <!--移动端,套餐关联的检查组查询,封装CheckItem集合-->
+    <resultMap id="findByIdResultMap" type="com.itheima.pojo.CheckGroup" extends="baseResultMap">
+        <!-- 封装关联的JavaBean的集合：CheckItem的集合 -->
+        <collection property="checkItems" ofType="com.itheima.pojo.CheckItem" javaType="ArrayList"
+                    column="id" select="com.itheima.dao.CheckItemDao.findCheckItemById">
+            <!-- select：调用哪个statement，懒加载 得到关联的JavaBean对象
+            column：调用statement时，需要传递的参数值，从哪个字段中取出 -->
+        </collection>
+    </resultMap>
+
+    <!--移动端,套餐关联的检查组查询,自身的数据-->
+    <resultMap id="baseResultMap" type="com.itheima.pojo.CheckGroup">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="helpCode" column="helpCode"/>
+        <result property="sex" column="sex"/>
+        <result property="remark" column="remark"/>
+        <result property="attention" column="attention"/>
+    </resultMap>
+
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/mvc
+						http://www.springframework.org/schema/mvc/spring-mvc.xsd
+						http://code.alibabatech.com/schema/dubbo
+						http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context.xsd
+                          http://www.springframework.org/schema/security
+                          http://www.springframework.org/schema/security/spring-security.xsd">
+    <!--1.匿名访问
+    2.权限配置
+    iframe设置
+    权限设置
+    表单登录
+    csrf过滤器
+    退出登录
+    3.认证管理
+    认证逻辑
+    加密策略
+    4.密码加密对象
+    5.权限注解支持
+    6.权限注解扫描(扩大在mvc中的扫描范围)
+    7.mvc配置中引入security配置文件-->
+
+    <!--1.匿名访问-->
+    <security:http security="none" pattern="/css/**"/>
+    <security:http security="none" pattern="/img/**"/>
+    <security:http security="none" pattern="/js/**"/>
+    <security:http security="none" pattern="/plugins/**"/>
+    <security:http security="none" pattern="/login.html"/>
+
+    <!--2.权限配置-->
+    <security:http auto-config="true" use-expressions="true">
+        <!--iframe设置-->
+        <security:headers>
+            <security:frame-options policy="SAMEORIGIN"/>
+        </security:headers>
+        <!--权限设置-->
+        <security:intercept-url pattern="/pages/**" access="isAuthenticated()"/>
+        <!--登录表单设置-->
+        <security:form-login login-processing-url="/login.do" username-parameter="username"
+                             password-parameter="password" default-target-url="/pages/main.html"
+                             authentication-failure-forward-url="/login.html" login-page="/login.html"/>
+        <!--csrf过滤器-->
+        <security:csrf disabled="true"/>
+        <!--退出登录-->
+        <security:logout logout-url="/logout.do" logout-success-url="/login.html" invalidate-session="true"/>
+    </security:http>
+
+    <!--3.认证管理-->
+<security:authentication-manager>
+    <security:authentication-provider user-service-ref="userSpringSecurityService">
+        <!--认证策略-->
+        <security:password-encoder ref="passwordEncoder"/>
+    </security:authentication-provider>
+</security:authentication-manager>
+
+    <!--4.加密对象-->
+    <bean id="passwordEncoder"
+          class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <!--5.开启注解权限-->
+    <security:global-method-security pre-post-annotations="enabled"/>
+</beans>

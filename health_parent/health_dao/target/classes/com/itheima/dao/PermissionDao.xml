@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace：给哪个接口配置的映射，写接口的全限定类名-->
+<mapper namespace="com.itheima.dao.PermissionDao">
+
+    <!--通过role的id得到permission对象-->
+    <select id="findByRoleId" parameterType="Integer" resultType="com.itheima.pojo.Permission">
+        select p.* from t_role_permission pr,t_permission p where p.id=pr.permission_id and pr.role_id =#{role_id}
+    </select>
+
+
+</mapper>
